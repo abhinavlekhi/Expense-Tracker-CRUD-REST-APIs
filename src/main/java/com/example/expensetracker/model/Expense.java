@@ -28,7 +28,6 @@ public class Expense {
     @Column(nullable=false)
     private BigDecimal amount;  // required column
 
-
     private String notes;
 
     @Column(nullable=false)

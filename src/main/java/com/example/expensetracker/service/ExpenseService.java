@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -23,7 +24,16 @@ public class ExpenseService {
     }
 
     // 2. Read (Get all expenses)
-    public List<Expense> getAllExpense() {
+    public List<Expense> getAllExpense(String title, LocalDate date) {
+        if (title != null && date != null) { // if both the query params are passed
+            return expenseRepository.findByExpenseTitleAndDate(title, date);
+        }
+        if (title != null) { // if only query param title is passed
+            return expenseRepository.findByExpenseTitle(title);
+        }
+        if (date != null) { // if only query param date is passed
+            return expenseRepository.findByDate(date);
+        }
         return expenseRepository.findAll();
     }
 

@@ -5,11 +5,11 @@ import com.example.expensetracker.model.Expense;
 import com.example.expensetracker.service.ExpenseService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -29,8 +29,11 @@ public class ExpenseController {
 
     // 2. Read - get all expenses
     @GetMapping
-    public ResponseEntity<ApiResponse<List<Expense>>> getAllExpenses() {
-        List<Expense> expenses = expenseService.getAllExpense();
+    public ResponseEntity<ApiResponse<List<Expense>>> getAllExpenses(
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) LocalDate date
+    ) {
+        List<Expense> expenses = expenseService.getAllExpense(title, date);
         return ResponseEntity.ok(new ApiResponse<>("Fetched all expenses till date successfully", expenses));
     }
 
