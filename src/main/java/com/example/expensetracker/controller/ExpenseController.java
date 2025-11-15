@@ -4,6 +4,7 @@ import com.example.expensetracker.dto.ApiResponse;
 import com.example.expensetracker.model.Expense;
 import com.example.expensetracker.service.ExpenseService;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +23,7 @@ public class ExpenseController {
 
     // 1. Create - Add a new Expense
     @PostMapping
-    public ResponseEntity<ApiResponse<Expense>> addExpense(@RequestBody Expense expense) {
+    public ResponseEntity<ApiResponse<Expense>> addExpense(@Valid @RequestBody Expense expense) {
         Expense savedExpense = expenseService.addExpense(expense);
         return ResponseEntity.ok(new ApiResponse<>("Expense created successfully", savedExpense));
     }
@@ -50,22 +51,14 @@ public class ExpenseController {
     // 4. Delete - delete particular expenses by it's id (UUID)
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<?>> deleteExpenseById(@PathVariable UUID id) {
-        try {
             expenseService.deleteExpenseById(id);
             return ResponseEntity.ok(new ApiResponse<>("Expense deleted successfully"));
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>("Could not delete the Expense as no expense found with provided id: "+id));
-        }
     }
 
     // 5. Patch - update a particular expense partially by its id (UUID), meaning without passing whole body, just pass whatever you want to update and it will do that
     @PatchMapping("/{id}")
     public ResponseEntity<ApiResponse<Expense>> updateExpensePartially(@PathVariable UUID id, @RequestBody Expense partialExpense) {
-        try {
             Expense updatedExpense= expenseService.updateExpensePartially(id, partialExpense);
             return ResponseEntity.ok(new ApiResponse<>("Expense updated successfully", updatedExpense));
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>("Could not update the Expense as no expense found with provided id: "+id));
-        }
     }
 }

@@ -4,7 +4,6 @@ import com.example.expensetracker.model.Expense;
 import com.example.expensetracker.repository.ExpenseRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -45,13 +44,13 @@ public class ExpenseService {
     // 4. Delete (delete expense by id)
     public void deleteExpenseById(UUID id) {
         if (!expenseRepository.existsById(id)) {
-            throw new EntityNotFoundException("Expense with id " + id + " not found");
+            throw new EntityNotFoundException("Could not delete the Expense as no expense was found with provided id: " + id);
         }
         expenseRepository.deleteById(id);
     }
 
     public Expense updateExpensePartially(UUID id, Expense partialExpense) {
-        Expense existingExpense = expenseRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Expense with id " + id + " not found"));
+        Expense existingExpense = expenseRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Could not update the Expense as no expense was found with provided id: " + id));
         if (partialExpense.getExpenseTitle() != null) {
             existingExpense.setExpenseTitle(partialExpense.getExpenseTitle());
         }
