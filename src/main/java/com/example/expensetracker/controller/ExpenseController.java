@@ -1,11 +1,15 @@
 package com.example.expensetracker.controller;
 
 import com.example.expensetracker.dto.ApiResponse;
+import com.example.expensetracker.dto.PaginationResponse;
 import com.example.expensetracker.model.Expense;
 import com.example.expensetracker.service.ExpenseService;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -28,17 +32,74 @@ public class ExpenseController {
         return ResponseEntity.ok(new ApiResponse<>("Expense created successfully", savedExpense));
     }
 
-    // 2. Read - get all expenses
+    // 2. Read - get all expenses, here we are using optional query params to filter expenses by title and/or date
+//    @GetMapping
+//    public ResponseEntity<ApiResponse<List<Expense>>> getAllExpenses(
+//            @RequestParam(required = false) String title,
+//            @RequestParam(required = false) LocalDate date
+//    ) {
+//        List<Expense> expenses = expenseService.getAllExpense(title, date);
+//        return ResponseEntity.ok(new ApiResponse<>("Fetched all expenses till date successfully", expenses));
+//    }
+
+    // 3. Read - get all expenses, here we are using pagination and sorting to cut down the records in the response payload
+//    @GetMapping
+//    public ResponseEntity<ApiResponse<?>> getAllExpenses1(
+//            @RequestParam (defaultValue="0") int page,
+//            @RequestParam (defaultValue="10") int size,
+//            @RequestParam (defaultValue = "id, asc") String[] sort
+//    ) {
+//        String sortField = sort[0];
+//        String sortDirection = sort.length > 1 ? sort[1] : "asc";
+//
+//        Sort springSort = sortDirection.equalsIgnoreCase("desc") ?
+//                Sort.by(sortField).descending() :
+//                Sort.by(sortField).ascending();
+//
+//        Pageable pageable = PageRequest.of(page, size, springSort);
+//
+//        Page<Expense> expensePage = expenseService.getExpenses(pageable);
+//        PaginationResponse pagination = new PaginationResponse(
+//                expensePage.getContent(),
+//                expensePage.getNumber(),
+//                expensePage.getSize(),
+//                expensePage.getTotalElements(),
+//                expensePage.getTotalPages(),
+//                expensePage.isLast()
+//        );
+//        return ResponseEntity.ok(new ApiResponse<>("Fetched all expenses successfully", pagination));
+//    }
+
+    // 3. Read - get certain expenses based on filter and pagination limit set, here we are using pagination and sorting to cut down the records in the response payload
     @GetMapping
-    public ResponseEntity<ApiResponse<List<Expense>>> getAllExpenses(
+    public ResponseEntity<ApiResponse<?>> getFilteredExpensesBasedOnPagination(
             @RequestParam(required = false) String title,
-            @RequestParam(required = false) LocalDate date
+            @RequestParam(required = false) LocalDate date,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDir
     ) {
-        List<Expense> expenses = expenseService.getAllExpense(title, date);
-        return ResponseEntity.ok(new ApiResponse<>("Fetched all expenses till date successfully", expenses));
+        Sort sort;
+        if (sortDir.equalsIgnoreCase("desc")) {
+            sort = Sort.by(sortBy).descending();
+        } else {
+            sort = Sort.by(sortBy).ascending();
+        }
+        Pageable pageable = PageRequest.of(page, size, sort);
+        Page<Expense> expensePage = expenseService.getFilteredExpenses(title, date, pageable);
+        PaginationResponse pagination = new PaginationResponse(
+                expensePage.getContent(),
+                expensePage.getNumber(),
+                expensePage.getSize(),
+                expensePage.getTotalElements(),
+                expensePage.getTotalPages(),
+                expensePage.isLast()
+        );
+        return ResponseEntity.ok(new ApiResponse<>("Fetched filtered expenses successfully", pagination));
     }
 
-    // 3. Fetch - get expenses by id
+    // 4. Fetch - get expenses by id
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<Expense>> getExpenseById(@PathVariable UUID id) {
         Optional<Expense> expense = expenseService.getExpenseById(id);
@@ -48,14 +109,14 @@ public class ExpenseController {
                         body(new ApiResponse<>("Expense not found with provided id: "+id)));
     }
 
-    // 4. Delete - delete particular expenses by it's id (UUID)
+    // 5. Delete - delete particular expenses by it's id (UUID)
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<?>> deleteExpenseById(@PathVariable UUID id) {
             expenseService.deleteExpenseById(id);
             return ResponseEntity.ok(new ApiResponse<>("Expense deleted successfully"));
     }
 
-    // 5. Patch - update a particular expense partially by its id (UUID), meaning without passing whole body, just pass whatever you want to update and it will do that
+    // 6. Patch - update a particular expense partially by its id (UUID), meaning without passing whole body, just pass whatever you want to update and it will do that
     @PatchMapping("/{id}")
     public ResponseEntity<ApiResponse<Expense>> updateExpensePartially(@PathVariable UUID id, @RequestBody Expense partialExpense) {
             Expense updatedExpense= expenseService.updateExpensePartially(id, partialExpense);

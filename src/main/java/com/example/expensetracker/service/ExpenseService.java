@@ -2,8 +2,12 @@ package com.example.expensetracker.service;
 
 import com.example.expensetracker.model.Expense;
 import com.example.expensetracker.repository.ExpenseRepository;
+import com.example.expensetracker.specification.ExpenseSpecification;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -68,5 +72,20 @@ public class ExpenseService {
         }
 
         return expenseRepository.save(existingExpense);
+    }
+
+    public Page<Expense> getExpenses(Pageable pageable) {
+        return expenseRepository.findAll( pageable);
+    }
+
+    public Page<Expense>getFilteredExpenses (String title, LocalDate date, Pageable pageable) {
+        Specification<Expense> spec = (root, query, cb) -> cb.conjunction();
+        if (title != null && !title.isEmpty()) {
+            spec = spec.and(ExpenseSpecification.hasTitle(title));
+        }
+        if (date != null) {
+            spec = spec.and(ExpenseSpecification.hasDate(date));
+        }
+        return expenseRepository.findAll(spec, pageable);
     }
 }
