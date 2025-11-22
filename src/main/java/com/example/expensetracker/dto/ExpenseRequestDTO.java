@@ -1,9 +1,7 @@
 package com.example.expensetracker.dto;
 
 import com.example.expensetracker.validation.NoNumbers;
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.*;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -13,6 +11,7 @@ import java.time.LocalDate;
 public class ExpenseRequestDTO {
 
     @NotBlank(message = "Expense title cannot be blank")
+    @Size(min=3, max=50, message="Expense title must be between 3 and 50 characters")
     @NoNumbers
     private String expenseTitle;
 
@@ -23,6 +22,7 @@ public class ExpenseRequestDTO {
     private String notes;
 
     @NotNull(message = "Date is required")
+    @PastOrPresent(message = "Date cannot be in the future")
     private LocalDate date;
 
 
