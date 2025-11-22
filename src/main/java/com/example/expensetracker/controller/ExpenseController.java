@@ -1,6 +1,7 @@
 package com.example.expensetracker.controller;
 
 import com.example.expensetracker.dto.ApiResponse;
+import com.example.expensetracker.dto.ExpenseRequestDTO;
 import com.example.expensetracker.dto.PaginationResponse;
 import com.example.expensetracker.model.Expense;
 import com.example.expensetracker.service.ExpenseService;
@@ -27,8 +28,8 @@ public class ExpenseController {
 
     // 1. Create - Add a new Expense
     @PostMapping
-    public ResponseEntity<ApiResponse<Expense>> addExpense(@Valid @RequestBody Expense expense) {
-        Expense savedExpense = expenseService.addExpense(expense);
+    public ResponseEntity<ApiResponse<Expense>> addExpense(@Valid @RequestBody ExpenseRequestDTO dto) {
+        Expense savedExpense = expenseService.addExpense(dto);
         return ResponseEntity.ok(new ApiResponse<>("Expense created successfully", savedExpense));
     }
 

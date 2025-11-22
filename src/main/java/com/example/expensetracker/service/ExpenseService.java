@@ -1,5 +1,6 @@
 package com.example.expensetracker.service;
 
+import com.example.expensetracker.dto.ExpenseRequestDTO;
 import com.example.expensetracker.model.Expense;
 import com.example.expensetracker.repository.ExpenseRepository;
 import com.example.expensetracker.specification.ExpenseSpecification;
@@ -22,7 +23,13 @@ public class ExpenseService {
     private ExpenseRepository expenseRepository;
 
     // 1. Create  (Add new Expense)
-    public Expense addExpense(Expense expense) {
+    public Expense addExpense(ExpenseRequestDTO dto) {
+
+        Expense expense = new Expense();
+        expense.setExpenseTitle(dto.getExpenseTitle());
+        expense.setAmount(dto.getAmount());
+        expense.setNotes(dto.getNotes());
+        expense.setDate(dto.getDate());
         return expenseRepository.save(expense);
     }
 
