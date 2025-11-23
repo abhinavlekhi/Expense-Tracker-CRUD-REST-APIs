@@ -119,8 +119,8 @@ public class ExpenseController {
 
     // 6. Patch - update a particular expense partially by its id (UUID), meaning without passing whole body, just pass whatever you want to update and it will do that
     @PatchMapping("/{id}")
-    public ResponseEntity<ApiResponse<Expense>> updateExpensePartially(@PathVariable UUID id, @RequestBody Expense partialExpense) {
-            Expense updatedExpense= expenseService.updateExpensePartially(id, partialExpense);
+    public ResponseEntity<ApiResponse<Expense>> updateExpensePartially(@PathVariable UUID id, @Valid @RequestBody ExpenseRequestDTO dto) {
+            Expense updatedExpense= expenseService.updateExpensePartially(id, dto);
             return ResponseEntity.ok(new ApiResponse<>("Expense updated successfully", updatedExpense));
     }
 }

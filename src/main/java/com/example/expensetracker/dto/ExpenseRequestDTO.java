@@ -1,6 +1,7 @@
 package com.example.expensetracker.dto;
 
 import com.example.expensetracker.validation.NoNumbers;
+import com.example.expensetracker.validation.UniqueTitle;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 
@@ -12,7 +13,9 @@ public class ExpenseRequestDTO {
 
     @NotBlank(message = "Expense title cannot be blank")
     @Size(min=3, max=50, message="Expense title must be between 3 and 50 characters")
+    @Pattern(regexp = "^[A-Za-z ]+$", message="Expense title can only contain letters and spaces")
     @NoNumbers
+    @UniqueTitle
     private String expenseTitle;
 
     @NotNull(message = "Amount is required")
@@ -24,6 +27,5 @@ public class ExpenseRequestDTO {
     @NotNull(message = "Date is required")
     @PastOrPresent(message = "Date cannot be in the future")
     private LocalDate date;
-
 
 }

@@ -17,4 +17,5 @@ public interface ExpenseRepository extends JpaRepository<Expense, UUID>, JpaSpec
     List<Expense> findByExpenseTitle(String title);
     List<Expense> findByDate(LocalDate date);
     List<Expense> findByExpenseTitleAndDate(String title, LocalDate date);
+    boolean existsByExpenseTitle(String title);
 }

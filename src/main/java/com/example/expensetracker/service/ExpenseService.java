@@ -60,22 +60,25 @@ public class ExpenseService {
         expenseRepository.deleteById(id);
     }
 
-    public Expense updateExpensePartially(UUID id, Expense partialExpense) {
+    public Expense updateExpensePartially(UUID id, ExpenseRequestDTO dto) {
         Expense existingExpense = expenseRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Could not update the Expense as no expense was found with provided id: " + id));
-        if (partialExpense.getExpenseTitle() != null) {
-            existingExpense.setExpenseTitle(partialExpense.getExpenseTitle());
+        if (dto.getExpenseTitle() != null && !dto.getExpenseTitle().equals(existingExpense.getExpenseTitle())) {
+            if (expenseRepository.existsByExpenseTitle(dto.getExpenseTitle())) {
+                throw new IllegalArgumentException("Title must be unique");
+            }
+            existingExpense.setExpenseTitle(dto.getExpenseTitle());
         }
 
-        if (partialExpense.getAmount() != null) {
-            existingExpense.setAmount(partialExpense.getAmount());
+        if (dto.getAmount() != null) {
+            existingExpense.setAmount(dto.getAmount());
         }
 
-        if (partialExpense.getNotes() != null) {
-            existingExpense.setNotes(partialExpense.getNotes());
+        if (dto.getNotes() != null) {
+            existingExpense.setNotes(dto.getNotes());
         }
 
-        if(partialExpense.getDate() != null) {
-            existingExpense.setDate(partialExpense.getDate());
+        if(dto.getDate() != null) {
+            existingExpense.setDate(dto.getDate());
         }
 
         return expenseRepository.save(existingExpense);
