@@ -21,6 +21,8 @@ public class ExpenseService {
 
     @Autowired // spring automatically injects the Repository dependency here
     private ExpenseRepository expenseRepository;
+    @Autowired
+    private AuditService auditService;
 
     // 1. Create  (Add new Expense)
     public Expense addExpense(ExpenseRequestDTO dto) {
@@ -30,6 +32,7 @@ public class ExpenseService {
         expense.setAmount(dto.getAmount());
         expense.setNotes(dto.getNotes());
         expense.setDate(dto.getDate());
+        auditService.logAudit("CREATED", expenseRepository.save(expense));
         return expenseRepository.save(expense);
     }
 
@@ -54,9 +57,9 @@ public class ExpenseService {
 
     // 4. Delete (delete expense by id)
     public void deleteExpenseById(UUID id) {
-        if (!expenseRepository.existsById(id)) {
-            throw new EntityNotFoundException("Could not delete the Expense as no expense was found with provided id: " + id);
-        }
+        Expense expense = expenseRepository.findById(id).orElseThrow(
+                () -> new EntityNotFoundException("Could not delete the Expense as no expense was found with provided id: "+id));
+        auditService.logAudit("DELETED", expense);
         expenseRepository.deleteById(id);
     }
 
@@ -80,7 +83,7 @@ public class ExpenseService {
         if(dto.getDate() != null) {
             existingExpense.setDate(dto.getDate());
         }
-
+        auditService.logAudit("UPDATED", expenseRepository.save(existingExpense));
         return expenseRepository.save(existingExpense);
     }
 
