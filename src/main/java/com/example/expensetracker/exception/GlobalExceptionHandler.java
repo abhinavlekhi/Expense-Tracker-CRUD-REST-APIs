@@ -52,11 +52,6 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ApiResponse<?>> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
         String message = "Invalid data. One or more fields violate database constraints.";
-//        Throwable cause = ex.getCause();
-
-//        if (ex.getMostSpecificCause().getMessage().contains("numeric")) {
-//            message = "Invalid amount, value exceeds allowed numeric precision.";
-//        }
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(message));
     }
 }
