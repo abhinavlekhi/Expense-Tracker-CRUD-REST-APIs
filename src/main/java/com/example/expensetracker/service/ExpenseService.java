@@ -4,6 +4,8 @@ import com.example.expensetracker.dto.ExpenseRequestDTO;
 import com.example.expensetracker.model.Expense;
 import com.example.expensetracker.repository.ExpenseRepository;
 import com.example.expensetracker.specification.ExpenseSpecification;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -25,6 +27,7 @@ public class ExpenseService {
     private AuditService auditService;
 
     // 1. Create  (Add new Expense)
+    @CacheEvict(value= "expenseCache", /*,"all_expenses"*/ allEntries = true)
     public Expense addExpense(ExpenseRequestDTO dto) {
 
         Expense expense = new Expense();
@@ -51,11 +54,14 @@ public class ExpenseService {
     }
 
     // 3. Read (find expense by id)
-    public Optional<Expense> getExpenseById(UUID id) {
-        return expenseRepository.findById(id);
+    @Cacheable(value= "expenseCache", key= "#id")
+    public Expense getExpenseById(UUID id) {
+        return expenseRepository.findById(id).orElseThrow(
+                () -> new EntityNotFoundException("Expense with id "+id+" not found"));
     }
 
     // 4. Delete (delete expense by id)
+    @CacheEvict(value = {"expenseCache"/*,"all_expenses"*/}, key= "#id", allEntries = true)
     public void deleteExpenseById(UUID id) {
         Expense expense = expenseRepository.findById(id).orElseThrow(
                 () -> new EntityNotFoundException("Could not delete the Expense as no expense was found with provided id: "+id));
@@ -63,6 +69,8 @@ public class ExpenseService {
         expenseRepository.deleteById(id);
     }
 
+    // 5. Update (expense by id)
+    @CacheEvict(value = {"expenseCache" /*,"all_expenses"*/}, key= "#id", allEntries = true)
     public Expense updateExpensePartially(UUID id, ExpenseRequestDTO dto) {
         Expense existingExpense = expenseRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Could not update the Expense as no expense was found with provided id: " + id));
         if (dto.getExpenseTitle() != null && !dto.getExpenseTitle().equals(existingExpense.getExpenseTitle())) {
@@ -91,6 +99,7 @@ public class ExpenseService {
         return expenseRepository.findAll( pageable);
     }
 
+    //@Cacheable(value= "all_expenses")
     public Page<Expense>getFilteredExpenses (String title, LocalDate date, Pageable pageable) {
         Specification<Expense> spec = (root, query, cb) -> cb.conjunction();
         if (title != null && !title.isEmpty()) {

@@ -5,6 +5,7 @@ import com.example.expensetracker.dto.ExpenseRequestDTO;
 import com.example.expensetracker.dto.PaginationResponse;
 import com.example.expensetracker.model.Expense;
 import com.example.expensetracker.service.ExpenseService;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -103,11 +104,13 @@ public class ExpenseController {
     // 4. Fetch - get expenses by id
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<Expense>> getExpenseById(@PathVariable UUID id) {
-        Optional<Expense> expense = expenseService.getExpenseById(id);
-        return expense
-                .map(value -> ResponseEntity.ok(new ApiResponse<>("Expense fetched successfully", value)))
-                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).
-                        body(new ApiResponse<>("Expense not found with provided id: "+id)));
+        try {
+            Expense expense = expenseService.getExpenseById(id);
+            return ResponseEntity.ok(new ApiResponse<>("Expense fetched successfully", expense));
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ApiResponse<>(e.getMessage()));
+        }
     }
 
     // 5. Delete - delete particular expenses by it's id (UUID)
