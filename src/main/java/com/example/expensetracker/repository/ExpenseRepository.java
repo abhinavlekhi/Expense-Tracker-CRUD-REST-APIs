@@ -18,4 +18,8 @@ public interface ExpenseRepository extends JpaRepository<Expense, UUID>, JpaSpec
     List<Expense> findByDate(LocalDate date);
     List<Expense> findByExpenseTitleAndDate(String title, LocalDate date);
     boolean existsByExpenseTitle(String title);
+    //findByDateBetween will be derived by spring, but how?? because of it's naming convention,
+    // but if we give a dummy name like ABCD?? then it won't be able to derive it and will throw error at run time,
+    // so always follow naming conventions for spring jpa derived queries
+    List<Expense> findByDateBetween(LocalDate startDate, LocalDate endDate);
 }
